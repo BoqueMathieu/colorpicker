@@ -1,0 +1,179 @@
+<style>
+.HUEBAR {display:inline-block; left:50px; top:100px; width:100px; height:30px; cursor:crosshair;
+ }
+table {
+	border: 1px solid black;
+	height: 300px;
+	width: 300px;
+}
+tr {
+	border: 1px solid black;
+	position: center;
+}
+td {
+	border: 1px solid black;
+}
+#couleur1{
+	height: 100%;
+	width: 100%;
+	cursor: pointer;
+}
+#couleur2{
+	height: 100%;
+	width: 100%;
+	cursor: pointer;
+}
+#couleur3{
+	height: 100%;
+	width: 100%;
+	cursor: pointer;
+}
+#couleur4{
+	height: 100%;
+	width: 100%;
+	cursor: pointer;
+}
+</style>
+
+<script>
+function colorPicker(){
+	var that = this;
+	this.hue =[];
+	this.affich=[];
+	this.moyennePonderee = function(min, max, rate) {
+		return min*(1-rate) + max*rate;
+	};
+
+	this.createPart = function(minR,minG,minB, maxR,maxG,maxB) {
+		var hueBar = document.createElement('div');
+		hueBar.className = 'HUEBAR';
+		hueBar.style.background = 'linear-gradient(to right, rgb('+minR+','+minG+','+minB+') , rgb('+maxR+','+maxG+','+maxB+'))';
+		hueBar.onclick = function(evt) {
+			var rate = evt.offsetX / hueBar.offsetWidth;
+			that.hue[0]= Math.round(that.moyennePonderee(minR, maxR, rate));
+			that.hue[1]= Math.round(that.moyennePonderee(minG, maxG, rate));
+			that.hue[2]= Math.round(that.moyennePonderee(minB, maxB, rate));
+			var color = 'rgb('+
+					Math.round(that.moyennePonderee(minR, maxR, rate))+','+
+					Math.round(that.moyennePonderee(minG, maxG, rate))+','+
+					Math.round(that.moyennePonderee(minB, maxB, rate))+')';
+			that.value = color;
+			that.square.style.background='linear-gradient(to right,  #FFF 0%,'+color+' 100%)';
+		};
+		
+		return hueBar;
+	}
+
+	this.container = document.createElement('div');
+	this.container.appendChild(that.createPart(255,0,0, 255,255,0));
+	this.container.appendChild(that.createPart(255,255,0, 0,255,0));
+	this.container.appendChild(that.createPart(0,255,0, 0,255,255));
+	this.container.appendChild(that.createPart(0,255,255, 0,0,255));
+	this.container.appendChild(that.createPart(0,0,255, 255,0,255));
+	this.container.appendChild(that.createPart(255,0,255, 255,0,0));
+	this.square = document.createElement('div');
+	this.square.style.height = '250px';
+	this.square.style.display='block';
+	this.square.style.width='500px';
+	this.container.appendChild(this.square);
+	
+	this.square1 = document.createElement('div');
+	this.square1.style.height = '250px';
+	this.square1.style.display='block';
+	this.square1.style.width='500px';
+	this.square1.style.background='linear-gradient(to bottom,  transparent 0%,#000 100%)';
+	this.square.appendChild(this.square1);
+	this.square1.onclick = function(evt) {
+			var rate = evt.offsetX / that.square1.offsetWidth;
+			var rate1 = 1- evt.offsetY / that.square1.offsetHeight;
+			that.affich[0]= Math.round(rate1*that.moyennePonderee(255, that.hue[0], rate));
+			that.affich[1]= Math.round(rate1*that.moyennePonderee(255, that.hue[1], rate));
+			that.affich[2]= Math.round(rate1*that.moyennePonderee(255, that.hue[2], rate));
+			that.Label.innerHTML="Rouge:"+that.affich[0]+'.';
+			that.Label1.innerHTML="Vert:"+that.affich[1]+'.';
+			that.Label2.innerHTML="Bleu:"+that.affich[2]+'.';
+
+			if(that.onchange)
+				that.onchange();
+		};
+	
+
+	this.resultat=document.createElement('div');
+	this.resultat.style.height = '250px';
+	this.resultat.style.position = 'absolute';
+	this.resultat.style.display='inline-block';
+	this.resultat.style.width='100px';
+	this.resultat.style.left='508px';
+	this.resultat.style.top='38px';	
+	this.resultat.style.background = 'linear-gradient(to right,  #c00000 0%,#000 100%)';
+	this.square1.appendChild(this.resultat);
+	this.Label =document.createElement('label');
+	this.Label.style.color= '#FFF';
+	this.Label.style.display='block';
+	this.resultat.appendChild(this.Label);
+	this.Label1 =document.createElement('label');
+	this.Label1.style.color= '#FFF';
+	this.Label1.style.display='block';
+	this.resultat.appendChild(this.Label1);
+	this.Label2 =document.createElement('label');
+	this.Label2.style.color= '#FFF';
+	this.Label2.style.display='block';
+	this.resultat.appendChild(this.Label2);
+}
+window.onload = function() {
+	
+	var child;
+	oColorPicker = new colorPicker;
+	oColorPicker.container.style.display="none";
+	oColorPicker.onchange = function() {
+		console.log("Couleur choisie : rgb("+oColorPicker.affich[0]+","+oColorPicker.affich[1]+","+oColorPicker.affich[2]+")");
+		child.style.background ="rgb("+oColorPicker.affich[0]+","+oColorPicker.affich[1]+","+oColorPicker.affich[2]+")"; 
+
+		oColorPicker.container.style.display="none";
+	};
+	document.body.appendChild(oColorPicker.container);
+
+	document.body.onclick = function(evt) {
+		
+		var elt = evt.target;
+		while(elt) {
+			if (elt.tagName == "TD"){
+				for (var i =0 ; i<elt.childNodes.length;i++){
+					oColorPicker.container.style.display="block";
+					 child = elt.childNodes[i];
+
+				}
+				 
+			}
+			elt = elt.parentNode;
+			
+		}
+		
+	}; 
+
+	
+};
+
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<table style="position:absolute;left:800px;border=chocolat">
+  <tr>
+    <td colspan="2"></td>
+  </tr>
+  <tr>
+    <td><div id="couleur1" ></div></td>
+
+    <td><div id="couleur2" ></div></td>
+  </tr>
+  <tr>
+    <td><div id="couleur3" ></div></td>
+    <td><div id="couleur4"></div></td>
+  </tr>
+</table>
+</body>
+</html>
